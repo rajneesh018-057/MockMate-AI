@@ -12,7 +12,7 @@ A full-stack application designed to simulate real-world technical interviews. I
 
 
 * **AI Microservice Architecture**:
-* **Question Generation**: dynamically creates unique interview questions using **Ollama (Mistral)**.
+* **Question Generation**: dynamically creates unique interview questions using Gemini.
 * **Smart Evaluation**: Analyzes both code logic and verbal transcription to provide a **Technical Score** and **Confidence Score**.
 
 
@@ -52,88 +52,10 @@ A full-stack application designed to simulate real-world technical interviews. I
 * **Speech-to-Text**: OpenAI Whisper (`base.en` model)
 * **Audio Processing**: PyDub / FFMPEG
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-1. **Node.js** (v16+) and **npm**.
-2. **Python** (v3.9+) and **pip**.
-3. **MongoDB**: Local instance or Atlas URI.
-4. **Ollama**: Installed and running locally.
-* Install from [ollama.com](https://ollama.com).
-* Pull the model: `ollama pull mistral`.
 
 
-5. **FFmpeg**: Required for audio processing (should be in your system PATH).
 
-### 1. Clone the Repository
 
-```bash
-git clone https://github.com/siddhantsaxenaofficial/ai-interviewer.git
-cd ai-interviewer
-
-```
-
-### 2. Backend Setup (Node.js)
-
-```bash
-cd backend
-npm install
-
-# Create a .env file
-echo "PORT=5000" > .env
-echo "MONGO_URI=your_mongodb_connection_string" >> .env
-echo "JWT_SECRET=your_jwt_secret" >> .env
-echo "NODE_ENV=development" >> .env
-
-# Run the server
-npm run server
-
-```
-
-### 3. AI Service Setup (Python)
-
-```bash
-cd ../ai_service
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install fastapi uvicorn ollama openai-whisper pydub python-dotenv
-
-# Create a .env file
-echo "AI_SERVICE_PORT=8000" > .env
-echo "OLLAMA_MODEL_NAME=mistral" >> .env
-
-# Run the microservice
-uvicorn main:app --reload --port 8000
-
-```
-
-### 4. Frontend Setup (React)
-
-```bash
-cd ../frontend
-npm install
-
-# Create a .env file
-echo "VITE_API_URL=http://localhost:5000/api" > .env
-
-# Run the frontend
-npm run dev
-
-```
-### or shortcut
-
-```
-CLICK ON FOR-FIRST-TIME.BAT FILE AND RUN
-
-```
----
 
 ## 📐 Architecture Overview
 
@@ -147,20 +69,4 @@ The application follows a microservices-inspired architecture to separate heavy 
 * Receives `POST /evaluate` (Text/Code -> Score/Feedback JSON).
 
 
-4. **Ollama**: The local LLM engine that powers the generation and evaluation logic.
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
