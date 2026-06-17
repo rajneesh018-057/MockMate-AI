@@ -1,72 +1,359 @@
-
 # 🧠 AI-Powered Technical Interview Prepper
 
-A full-stack application designed to simulate real-world technical interviews. It allows users to practice answering conceptual and coding questions verbally and programmatically, receiving instant, AI-driven feedback on their performance.
+A full-stack AI-powered interview preparation platform that simulates real-world technical interviews. Users can practice both conceptual and coding questions through voice and code submissions, receive AI-generated feedback, and track their progress through detailed analytics.
 
-## ✨ Key Features
-
-* **Customizable Interviews**: Select Role (MERN, Python, Data Science), Difficulty Level, and Interview Type (Oral vs. Coding Mix).
-* **Hybrid Input System**:
-* **🎙️ Voice Response**: Uses **OpenAI Whisper** to transcribe verbal answers for conceptual questions.
-* **💻 Code Editor**: Integrated **Monaco Editor** for solving coding challenges directly in the browser.
-
-
-* **AI Microservice Architecture**:
-* **Question Generation**: dynamically creates unique interview questions using Gemini.
-* **Smart Evaluation**: Analyzes both code logic and verbal transcription to provide a **Technical Score** and **Confidence Score**.
-
-
-* **Detailed Analytics**:
-* Session history with global scores.
-* Per-question breakdown showing user submission vs. ideal implementation.
-* Performance charts using **Chart.js**.
-
-
-* **Secure Authentication**: JWT-based user login and registration.
+The platform combines modern web technologies, AI evaluation, speech recognition, and a microservices architecture to create an interactive interview preparation experience.
 
 ---
 
-## 🛠️ Tech Stack
+# 🚀 Features
 
-### **Frontend**
+## 🎯 Customizable Interview Experience
 
-* **Framework**: React (Vite)
-* **State Management**: Redux Toolkit
-* **Styling**: Tailwind CSS
-* **Editor**: `@monaco-editor/react`
-* **Visualization**: Chart.js / React-Chartjs-2
-* **Routing**: React Router Dom
+Users can create personalized interview sessions by selecting:
 
-### **Backend (API Gateway)**
+* Job Role (MERN Stack, Python, Data Science, etc.)
+* Difficulty Level (Easy, Medium, Hard)
+* Interview Type (Conceptual, Coding, or Mixed)
 
-* **Runtime**: Node.js
-* **Framework**: Express.js
-* **Database**: MongoDB (Mongoose)
-* **Authentication**: JSON Web Tokens (JWT) & bcryptjs
+---
 
-### **AI Microservice**
+## 🎙️ Voice-Based Responses
 
-* **Runtime**: Python 3.9+
-* **Framework**: FastAPI
-* **LLM Engine**:  GEMINI (gemini-2.5-flash - model)
-* **Speech-to-Text**: OpenAI Whisper (`base.en` model)
-* **Audio Processing**: PyDub / FFMPEG
+For conceptual questions, users can answer verbally.
+
+Features:
+
+* Audio recording directly from the browser
+* Speech-to-text conversion using OpenAI Whisper
+* AI evaluation of verbal responses
+* Confidence and communication assessment
+
+---
+
+## 💻 Integrated Coding Environment
+
+Coding challenges can be solved directly inside the application using Monaco Editor.
+
+Features:
+
+* Professional coding environment
+* Syntax highlighting
+* Real-time code editing
+* AI-powered code evaluation
+
+---
+
+## 🤖 AI-Powered Interview Engine
+
+### Question Generation
+
+The AI service dynamically generates interview questions based on:
+
+* Selected role
+* Difficulty level
+* Interview type
+
+This ensures every interview session feels unique.
+
+### Smart Evaluation
+
+The AI evaluates:
+
+* Technical correctness
+* Problem-solving approach
+* Code quality
+* Communication skills
+* Confidence level
+
+Users receive detailed feedback instead of just a score.
+
+---
+
+## 📊 Analytics Dashboard
+
+Track interview performance over time.
+
+Features:
+
+* Overall performance score
+* Technical score
+* Confidence score
+* Session history
+* Question-wise analysis
+* Performance trends
+* Interactive charts
+
+---
+
+## 🔐 Secure Authentication
+
+Authentication system built with:
+
+* JWT Authentication
+* Password Hashing using bcryptjs
+* Protected Routes
+* Persistent Login Sessions
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+
+* React (Vite)
+* Redux Toolkit
+* React Router DOM
+* Tailwind CSS
+* Axios
+* Chart.js
+* React Chartjs 2
+* Monaco Editor (`@monaco-editor/react`)
+* React Toastify
+
+---
+
+## Backend API Gateway
+
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+* JWT Authentication
+* bcryptjs
+
+---
+
+## AI Microservice
+
+* Python 3.9+
+* FastAPI
+* Gemini 2.5 Flash
+* OpenAI Whisper
+* PyDub
+* FFmpeg
+
+---
+
+## DevOps & Deployment
+
+* Docker
+* Docker Compose
+* Multi-Container Architecture
+* Container Networking
+
+---
+
+# 📐 System Architecture
+
+The application follows a microservices-inspired architecture where AI processing is separated from the main backend service.
+
+```text
+┌────────────────────┐
+│   React Frontend   │
+└─────────┬──────────┘
+          │
+          ▼
+┌────────────────────┐
+│ Node.js API Gateway│
+└───────┬─────┬──────┘
+        │     │
+        ▼     ▼
+┌──────────┐ ┌───────────────┐
+│ MongoDB  │ │ FastAPI AI    │
+│ Database │ │ Microservice  │
+└──────────┘ └───────┬───────┘
+                     │
+                     ▼
+             ┌──────────────┐
+             │ Gemini AI    │
+             │ OpenAI       │
+             │ Whisper      │
+             └──────────────┘
+```
+
+---
+
+# ⚙️ Application Workflow
+
+### 1. User Authentication
+
+* User registers or logs in
+* JWT token is generated
+* Protected routes become accessible
+
+### 2. Interview Creation
+
+User selects:
+
+* Role
+* Difficulty
+* Interview Type
+
+The request is sent to the AI service.
+
+### 3. Question Generation
+
+The AI service:
+
+* Receives interview configuration
+* Generates tailored interview questions
+* Sends questions back to the frontend
+
+### 4. User Response
+
+#### Conceptual Questions
+
+* User records voice response
+* Audio is uploaded to AI service
+* Whisper transcribes speech into text
+
+#### Coding Questions
+
+* User writes code in Monaco Editor
+* Code is submitted for evaluation
+
+### 5. AI Evaluation
+
+The AI evaluates:
+
+* Technical accuracy
+* Communication quality
+* Confidence level
+* Coding logic
+* Problem-solving approach
+
+### 6. Analytics Generation
+
+Results are:
+
+* Stored in MongoDB
+* Displayed in analytics dashboard
+* Added to interview history
+
+---
+
+# 🐳 Dockerized Deployment
+
+The project is fully containerized using Docker.
+
+## Container Architecture
+
+The application consists of multiple services:
+
+| Service    | Technology        | Purpose        |
+| ---------- | ----------------- | -------------- |
+| Frontend   | React + Vite      | User Interface |
+| Backend    | Node.js + Express | API Gateway    |
+| AI Service | FastAPI           | AI Processing  |
+| Database   | MongoDB           | Data Storage   |
+
+---
+
+## Running the Application
+
+### Build and Start Containers
+
+```bash
+docker-compose up --build
+```
+
+### Run in Detached Mode
+
+```bash
+docker-compose up -d
+```
+
+### Stop Containers
+
+```bash
+docker-compose down
+```
+
+### View Logs
+
+```bash
+docker-compose logs -f
+```
+
+---
 
 
 
+---
+
+# 📂 Project Structure
+
+```text
+project-root/
+│
+├── client/
+│   ├── src/
+│   ├── public/
+│   └── Dockerfile
+│
+├── server/
+│   ├── controllers/
+│   ├── routes/
+│   ├── models/
+│   ├── middleware/
+│   └── Dockerfile
+│
+├── ai-service/
+│   ├── main.py
+│   ├── services/
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── docker-compose.yml
+│
+└── README.md
+```
+
+---
+
+# 🔑 Environment Variables
+
+## Frontend
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+```
+
+## Backend
+
+```env
+PORT=5000
+MONGO_URI=YOUR_MONGO_URI
+JWT_SECRET=YOUR_SECRET
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+```
+
+## AI Service
+
+```env
+GOOGLE_API_KEY=YOUR_GEMINI_API_KEY
+```
+
+---
 
 
 
-## 📐 Architecture Overview
-
-The application follows a microservices-inspired architecture to separate heavy AI processing from the main application logic.
-
-1. **Client (React)**: Handles UI, Audio Recording, and Code Editing. Sends data to Node.js.
-2. **Node.js Server**: Acts as the API Gateway. Handles Auth, Database storage, and forwards AI tasks to the Python service.
-3. **Python Service**:
-* Receives `POST /generate-questions`.
-* Receives `POST /transcribe` (Audio -> Text).
-* Receives `POST /evaluate` (Text/Code -> Score/Feedback JSON).
+---
 
 
 
+---
+
+# 📄 License
+
+This project is developed for educational, learning, and portfolio purposes.
+
+---
+
+# 👨‍💻 Author
+
+**Rajneesh Kumar**
+
+If you found this project helpful, consider giving it a ⭐ on GitHub.
