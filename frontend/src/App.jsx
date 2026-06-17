@@ -18,7 +18,7 @@ const App = () => {
   useSocket();
 
   const location = useLocation();
-s
+
   const isAuthPage =
     location.pathname === "/login" ||
     location.pathname === "/register";
