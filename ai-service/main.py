@@ -5,6 +5,11 @@ import json
 import tempfile
 import re
 
+# Add FFMPEG path directly to environment PATH to ensure pydub finds it on Windows
+ffmpeg_path = r"C:\Users\VIVEK\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin"
+if os.path.exists(ffmpeg_path) and ffmpeg_path not in os.environ["PATH"]:
+    os.environ["PATH"] += os.path.pathsep + ffmpeg_path
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
