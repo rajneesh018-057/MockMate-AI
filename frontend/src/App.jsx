@@ -13,14 +13,16 @@ import Profile from "./pages/Profile";
 import InterviewRunner from "./pages/InterviewRunner";
 import SessionReview from "./pages/SessionReview";
 import NotFound from "./pages/NotFound";
+import LiveBackground from "./components/LiveBackground";
 
 
 const App = () => {
   useSocket();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <main className="flex-1 w-full flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
+      <LiveBackground />
+      <main className="flex-1 w-full flex flex-col relative z-10">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
