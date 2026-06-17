@@ -66,14 +66,21 @@ function SessionReview() {
         dispatch(getSessionById(sessionId));
     }, [dispatch, sessionId]);
 
-    if (isLoading) return <div className="text-center py-20 font-bold text-slate-400 animate-pulse uppercase tracking-widest">Generating Analysis...</div>;
+    if (isLoading) {
+        return (
+            <div className="flex flex-col justify-center items-center min-h-[80vh] gap-4 font-sans">
+                <div className="animate-spin h-10 w-10 border-2 border-teal-500 border-t-transparent rounded-full" />
+                <p className="text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase animate-pulse">Generating AI Analytical Report...</p>
+            </div>
+        );
+    }
 
     if (!activeSession || activeSession.status !== 'completed') {
         return (
-            <div className="max-w-xl mx-auto mt-10 sm:mt-20 p-6 sm:p-10 bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl text-center border border-slate-100 ">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-800 mb-4 tracking-tighter uppercase">Report Not Ready</h2>
-                <p className="text-slate-500 mb-8 font-medium text-sm sm:text-base">This session is still being processed by our AI network.</p>
-                <Link to="/" className="inline-block bg-teal-600 text-white px-8 py-3 sm:px-10 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl transition hover:bg-teal-700 active:scale-95 text-xs sm:text-sm">Dashboard</Link>
+            <div className="max-w-xl mx-auto mt-10 sm:mt-20 p-8 sm:p-10 glass-card rounded-[2rem] shadow-2xl text-center border border-white/5 font-sans">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-4 tracking-wide uppercase">Report Processing</h2>
+                <p className="text-slate-400 mb-8 text-xs font-semibold">This interview session is currently being evaluated by our backend AI engine.</p>
+                <Link to="/dashboard" className="inline-block bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-widest shadow-lg transition hover:scale-[1.02] active:scale-95">Go to Dashboard</Link>
             </div>
         );
     }
@@ -86,20 +93,20 @@ function SessionReview() {
         datasets: [{
             label: 'Technical Score',
             data: questions.map(q => q.technicalScore || 0),
-            backgroundColor: questions.map(q => (q.technicalScore || 0) > 70 ? '#10b981' : '#f59e0b'),
-            borderRadius: 8,
+            backgroundColor: questions.map(q => (q.technicalScore || 0) > 70 ? '#14b8a6' : '#f59e0b'),
+            borderRadius: 6,
         }],
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 sm:space-y-12 animate-in fade-in duration-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 sm:space-y-10 animate-in fade-in duration-700 font-sans">
 
             {/* --- Header --- */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 pb-6 sm:pb-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/5 pb-6 sm:pb-8">
                 <div>
-                    <span className="text-teal-600 font-black uppercase tracking-[0.2em] text-[10px]">Assessment Complete</span>
-                    <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mt-2 uppercase">
-                        {role} <span className="text-slate-300 font-medium lowercase block sm:inline">({level})</span>
+                    <span className="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] block">Assessment Complete</span>
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2 uppercase">
+                        {role} <span className="text-slate-500 font-medium tracking-wide lowercase text-sm sm:text-base block sm:inline">({level})</span>
                     </h1>
                 </div>
             </div>
@@ -112,16 +119,16 @@ function SessionReview() {
                     { label: 'Avg Confidence', value: `${finalMetrics.avgConfidence}%`, color: 'slate' },
                     { label: 'Session Time', value: formatDuration(startTime, endTime), color: 'slate' }
                 ].map((stat, i) => (
-                    <div key={i} className={`min-w-[160px] snap-center bg-white p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] shadow-sm border-l-[8px] ${stat.color === 'teal' ? 'border-teal-500' : 'border-slate-100'}`}>
-                        <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]">{stat.label}</p>
-                        <p className={`text-2xl sm:text-4xl font-black mt-2 leading-none ${stat.color === 'teal' ? 'text-teal-600' : 'text-slate-800'}`}>{stat.value}</p>
+                    <div key={i} className={`min-w-[160px] snap-center glass-card p-6 sm:p-7 rounded-[2rem] shadow-sm border-l-[6px] ${stat.color === 'teal' ? 'border-teal-500' : 'border-slate-800'}`}>
+                        <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.1em]">{stat.label}</p>
+                        <p className={`text-2xl sm:text-3xl font-black mt-2 leading-none ${stat.color === 'teal' ? 'text-teal-400' : 'text-slate-200'}`}>{stat.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* --- Chart --- */}
-            <div className="bg-white p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] shadow-sm border border-slate-50">
-                <h3 className="text-[10px] font-black text-slate-400 mb-6 uppercase tracking-[0.2em]">Per-Question Performance</h3>
+            <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] border border-white/5 shadow-xl">
+                <h3 className="text-[10px] font-black text-slate-500 mb-6 uppercase tracking-[0.2em]">Per-Question Performance</h3>
                 <div className="h-64 sm:h-80">
                     <Bar
                         data={barData}
@@ -129,8 +136,16 @@ function SessionReview() {
                             maintainAspectRatio: false,
                             plugins: { legend: { display: false } },
                             scales: {
-                                y: { beginAtZero: true, max: 100, grid: { color: '#f8fafc' } },
-                                x: { grid: { display: false } }
+                                y: { 
+                                    beginAtZero: true, 
+                                    max: 100, 
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+                                },
+                                x: { 
+                                    grid: { display: false },
+                                    ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+                                }
                             }
                         }}
                     />
@@ -138,43 +153,43 @@ function SessionReview() {
             </div>
 
             {/* --- Detailed Question Review --- */}
-            <div className="space-y-6 sm:space-y-10">
-                <h3 className="text-xl sm:text-3xl font-black text-slate-900 px-2 flex items-center tracking-tighter uppercase">
-                    <span className="w-8 h-8 sm:w-12 sm:h-12 bg-slate-900 text-white rounded-xl sm:rounded-2xl flex items-center justify-center mr-3 sm:mr-5 text-base sm:text-xl">✓</span>
+            <div className="space-y-6 sm:space-y-8">
+                <h3 className="text-xl sm:text-2xl font-extrabold text-white px-2 flex items-center tracking-wide uppercase">
+                    <span className="w-8 h-8 sm:w-10 sm:h-10 bg-white/5 border border-white/10 text-teal-400 rounded-xl flex items-center justify-center mr-3 text-base">✓</span>
                     Answer Intelligence
                 </h3>
-                <div className="space-y-6 sm:space-y-10">
+                <div className="space-y-6 sm:space-y-8">
                     {questions.map((q, index) => (
-                        <div key={index} className="bg-white rounded-3xl sm:rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-500">
-                            <div className="p-6 sm:p-10 space-y-6 sm:space-y-8">
+                        <div key={index} className="glass-card rounded-[2.5rem] border border-white/5 shadow-md overflow-hidden group hover:border-teal-500/20 transition-all duration-300">
+                            <div className="p-6 sm:p-8 space-y-6">
 
                                 {/* Header: Question & Scores */}
                                 <div className="flex flex-col lg:flex-row justify-between items-start gap-4 sm:gap-6">
-                                    <h4 className="text-lg sm:text-2xl font-bold text-slate-800 flex-1 leading-snug">
-                                        <span className="text-teal-500 mr-2 font-black italic">Q{index + 1}.</span> {sanitizeQuestionText(q.questionText)}
+                                    <h4 className="text-base sm:text-lg font-bold text-slate-100 flex-1 leading-snug">
+                                        <span className="text-teal-400 mr-1.5 font-black italic">Q{index + 1}.</span> {sanitizeQuestionText(q.questionText)}
                                     </h4>
                                     <div className="flex gap-2 shrink-0">
-                                        <div className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl sm:rounded-2xl border flex items-center gap-2 bg-emerald-50 border-emerald-100">
-                                            <span className="text-[8px] sm:text-[10px] font-black uppercase text-slate-400">Tech</span>
-                                            <span className="text-xs sm:text-sm font-black text-emerald-600">{q.technicalScore}%</span>
+                                        <div className="px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 flex items-center gap-2">
+                                            <span className="text-[8px] sm:text-[9px] font-black uppercase text-slate-400">Tech</span>
+                                            <span className="text-xs font-black text-emerald-400">{q.technicalScore}%</span>
                                         </div>
-                                        <div className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl sm:rounded-2xl border border-blue-50 bg-blue-50/30 flex items-center gap-2">
-                                            <span className="text-[8px] sm:text-[10px] font-black uppercase text-slate-400">Conf</span>
-                                            <span className="text-xs sm:text-sm font-black text-blue-600">{q.confidenceScore}%</span>
+                                        <div className="px-3 py-1.5 rounded-xl border border-blue-500/20 bg-blue-500/10 flex items-center gap-2">
+                                            <span className="text-[8px] sm:text-[9px] font-black uppercase text-slate-400">Conf</span>
+                                            <span className="text-xs font-black text-blue-400">{q.confidenceScore}%</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* --- User's Submission Display (Corrected) --- */}
                                 <div className="space-y-3">
-                                    <label className="text-[9px] sm:text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] block ml-1">Your Submission</label>
-                                    <div className="bg-slate-50 rounded-2xl sm:rounded-[2rem] border border-slate-100 overflow-hidden">
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block ml-1">Your Submission</label>
+                                    <div className="bg-slate-950/60 rounded-2xl border border-white/5 overflow-hidden">
 
                                         {/* Display Code if available */}
                                         {q.userSubmittedCode && q.userSubmittedCode !== "undefined" && (
-                                            <div className="p-4 sm:p-6 border-b border-slate-200 last:border-0">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase mb-2 block">Code</span>
-                                                <pre className="text-[11px] sm:text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-x-auto">
+                                            <div className="p-4 sm:p-5 border-b border-white/5 last:border-0">
+                                                <span className="text-[9px] font-black text-slate-500 uppercase mb-2 block">Code</span>
+                                                <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap overflow-x-auto">
                                                     {q.userSubmittedCode}
                                                 </pre>
                                             </div>
@@ -182,9 +197,9 @@ function SessionReview() {
 
                                         {/* Display Transcript if available */}
                                         {q.userAnswerText && (
-                                            <div className="p-4 sm:p-6">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase mb-2 block">Transcript</span>
-                                                <p className="text-xs sm:text-sm text-slate-600 italic leading-relaxed">
+                                            <div className="p-4 sm:p-5">
+                                                <span className="text-[9px] font-black text-slate-500 uppercase mb-2 block">Transcript</span>
+                                                <p className="text-xs text-slate-400 italic leading-relaxed">
                                                     "{q.userAnswerText}"
                                                 </p>
                                             </div>
@@ -192,7 +207,7 @@ function SessionReview() {
 
                                         {/* Fallback if nothing was recorded */}
                                         {(!q.userSubmittedCode || q.userSubmittedCode === "undefined") && !q.userAnswerText && (
-                                            <div className="p-6 text-center text-slate-400 text-xs italic">
+                                            <div className="p-5 text-center text-slate-500 text-xs italic">
                                                 No answer recorded.
                                             </div>
                                         )}
@@ -200,17 +215,16 @@ function SessionReview() {
                                 </div>
 
                                 {/* Feedback & Ideal Answer Grid */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 pt-6 sm:pt-8 border-t border-slate-50">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 pt-6 border-t border-white/5">
                                     <div className="space-y-3">
-                                        <label className="text-[9px] sm:text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] block ml-1">AI Analytical Feedback</label>
-                                        <div className="bg-slate-50/50 p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] text-xs sm:text-sm italic text-slate-600 border-l-[4px] sm:border-l-[6px] border-teal-500 leading-relaxed">
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block ml-1">AI Analytical Feedback</label>
+                                        <div className="bg-teal-500/5 p-4 sm:p-5 rounded-2xl text-xs sm:text-sm italic text-teal-300/95 border-l-[4px] border-teal-500 border border-white/5 leading-relaxed">
                                             "{q.aiFeedback}"
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[9px] sm:text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] block ml-1">Ideal Implementation</label>
-                                        <pre className="bg-slate-900 text-slate-400 p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] text-[11px] sm:text-[13px] overflow-x-auto whitespace-pre-wrap font-mono shadow-inner leading-relaxed">
-                                            {/* Using the updated helper function here */}
+                                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] block ml-1">Ideal Implementation</label>
+                                        <pre className="bg-slate-950 text-slate-300 p-4 sm:p-5 rounded-2xl text-[11px] sm:text-xs overflow-x-auto whitespace-pre-wrap font-mono shadow-inner border border-white/5 leading-relaxed">
                                             {formatIdealAnswer(q.idealAnswer)}
                                         </pre>
                                     </div>

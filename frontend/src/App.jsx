@@ -1,9 +1,10 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import useSocket from "./hooks/useSocket";
 
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
@@ -17,23 +18,18 @@ import NotFound from "./pages/NotFound";
 const App = () => {
   useSocket();
 
-  const location = useLocation();
-
-  const isAuthPage =
-    location.pathname === "/login" ||
-    location.pathname === "/register";
-
   return (
-    <div className="min-h-screen">
-      <main className={isAuthPage ? "w-full" : "container mx-auto p-4"}>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      <main className="flex-1 w-full flex flex-col">
         <Routes>
-        
-
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          <Route path="/" element={<PrivateRoute />}>
-            <Route index element={<Dashboard />} />
+          {/* Protected Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route
               path="interview/:sessionId"
@@ -45,6 +41,7 @@ const App = () => {
             />
           </Route>
 
+          {/* Fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -52,6 +49,7 @@ const App = () => {
       <ToastContainer
         position="top-right"
         autoClose={3000}
+        theme="dark"
       />
     </div>
   );

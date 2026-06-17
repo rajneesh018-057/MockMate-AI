@@ -210,19 +210,27 @@ function InterviewRunner() {
   const currentDraft = drafts[currentQuestionIndex] || {};
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 pb-32">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-10 pb-36 font-sans">
+      
+      {/* Top Session HUD */}
+      <div className="flex justify-between items-center glass-card p-5 sm:p-6 rounded-[2rem] shadow-xl mb-6">
         <div>
-          <h1 className="text-xl font-black text-slate-900">{activeSession.role}</h1>
-          <div className="flex gap-2 mt-2">
+          <h1 className="text-lg sm:text-xl font-extrabold text-white tracking-wide uppercase">{activeSession.role}</h1>
+          <div className="flex gap-2.5 mt-2.5">
             {activeSession?.questions?.map((q, i) => (
               <div
                 key={i}
                 onClick={() => handleNavigation(i)}
-                className={`w-3 h-3 rounded-full cursor-pointer transition-all ${i === currentQuestionIndex ? 'bg-blue-600 scale-125 ring-2 ring-blue-200' :
-                  q.isEvaluated ? 'bg-emerald-500' :
-                    (q.isSubmitted || submittedLocal[i]) ? 'bg-amber-400 animate-pulse' : 'bg-slate-200'
-                  }`}
+                className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${
+                  i === currentQuestionIndex 
+                    ? 'bg-teal-400 scale-125 shadow-[0_0_10px_rgba(20,184,166,0.6)]' 
+                    : q.isEvaluated 
+                    ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' 
+                    : (q.isSubmitted || submittedLocal[i]) 
+                    ? 'bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.4)]' 
+                    : 'bg-slate-800 border border-white/5'
+                }`}
+                title={`Question ${i + 1}`}
               />
             ))}
           </div>
@@ -230,100 +238,131 @@ function InterviewRunner() {
         <button
           onClick={handleFinishInterview}
           disabled={isLoading}
-          className="bg-rose-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-rose-700 disabled:opacity-50"
+          className="bg-rose-500/15 border border-rose-500/20 text-rose-300 px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider hover:bg-rose-600 hover:text-white disabled:opacity-50 transition-all duration-300"
         >
           {isLoading ? "Finalizing..." : "Finish Interview"}
         </button>
       </div>
 
-      <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl mb-6">
-        <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Question {currentQuestionIndex + 1}</span>
-        <h2 className="text-2xl mt-2 font-medium leading-relaxed">{currentQuestion?.questionText}</h2>
+      {/* Main Question Display */}
+      <div className="bg-gradient-to-r from-teal-950/20 via-slate-900/60 to-cyan-950/20 border border-white/5 p-6 sm:p-8 rounded-[2rem] shadow-2xl mb-6">
+        <span className="text-teal-400 text-[9px] font-black uppercase tracking-[0.25em]">Question {currentQuestionIndex + 1} of {activeSession.questions.length}</span>
+        <h2 className="text-xl sm:text-2xl mt-2.5 font-semibold leading-relaxed text-slate-100">{currentQuestion?.questionText}</h2>
       </div>
 
+      {/* Inputs Panels Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center min-h-[300px]">
-          <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Verbal Answer</h3>
+        {/* Left Side: Audio Recording Component */}
+        <div className="glass-card p-6 sm:p-8 rounded-[2rem] shadow-xl flex flex-col items-center justify-center min-h-[350px] relative overflow-hidden">
+          <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest absolute top-6">Verbal Explanation</h3>
 
           {!isRecording && !currentDraft.audioBlob ? (
-            <button
-              onClick={startRecording}
-              disabled={isQuestionLocked}
-              className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:bg-slate-400 disabled:cursor-not-allowed"
-            >
-              🎤
-            </button>
+            <div className="flex flex-col items-center gap-5">
+              <button
+                onClick={startRecording}
+                disabled={isQuestionLocked}
+                className="w-18 h-18 bg-teal-500 text-white rounded-full flex items-center justify-center text-2xl shadow-lg shadow-teal-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:bg-slate-800 disabled:shadow-none disabled:cursor-not-allowed"
+              >
+                🎤
+              </button>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Tap microphone to answer verbally</p>
+            </div>
           ) : isRecording ? (
-            <div className="text-center">
-              <div className="w-20 h-20 bg-rose-500 rounded-full flex items-center justify-center animate-pulse text-white text-3xl cursor-pointer" onClick={stopRecording}>
-                ⏹
+            <div className="text-center flex flex-col items-center gap-4">
+              <div className="relative flex items-center justify-center">
+                {/* Wave animation circles */}
+                <div className="absolute w-24 h-24 rounded-full bg-rose-500/20 animate-ping" />
+                <div className="absolute w-20 h-20 rounded-full bg-rose-500/30 animate-pulse" />
+                
+                <button
+                  onClick={stopRecording}
+                  className="relative z-10 w-16 h-16 bg-rose-500 rounded-full flex items-center justify-center text-white text-xl shadow-lg shadow-rose-500/20 hover:scale-95 transition-transform"
+                >
+                  ⏹
+                </button>
               </div>
-              <p className="mt-4 font-mono text-rose-500 font-bold">{recordingTime}s</p>
+              <p className="mt-2 font-mono text-rose-400 font-black tracking-widest text-sm">{recordingTime}s</p>
+              <p className="text-xs text-rose-500 font-bold uppercase tracking-wider animate-pulse">Recording explanation...</p>
             </div>
           ) : (
-            <div className="text-center">
-              <div className="text-emerald-500 font-bold text-lg mb-2">Audio Captured ✅</div>
+            <div className="text-center flex flex-col items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl shadow-md">
+                ✓
+              </div>
+              <div className="text-emerald-400 font-extrabold text-sm uppercase tracking-wide">Audio Answer Captured</div>
               {!isQuestionLocked && (
-                <button onClick={() => setDrafts(prev => ({ ...prev, [currentQuestionIndex]: { ...prev[currentQuestionIndex], audioBlob: null } }))} className="text-xs text-slate-400 underline hover:text-rose-500">
-                  Delete & Re-record
+                <button onClick={() => setDrafts(prev => ({ ...prev, [currentQuestionIndex]: { ...prev[currentQuestionIndex], audioBlob: null } }))} className="text-xs text-slate-500 underline font-semibold hover:text-rose-400 transition-colors">
+                  Delete & Re-record Answer
                 </button>
               )}
             </div>
           )}
         </div>
 
-        <div className="bg-white p-2 rounded-3xl border border-slate-100 shadow-sm overflow-hidden h-[400px]">
-          <div className="flex justify-between px-4 py-2 bg-slate-50 border-b border-slate-100">
-            <span className="text-xs font-bold text-slate-500 uppercase py-2">Code Editor</span>
+        {/* Right Side: Code Editor Component */}
+        <div className="glass-card p-1 rounded-[2rem] shadow-xl overflow-hidden h-[400px] flex flex-col">
+          <div className="flex justify-between items-center px-4.5 py-3 bg-slate-900/50 border-b border-white/5">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Code Implementation</span>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
               disabled={isQuestionLocked}
-              className="text-xs bg-white border border-slate-200 rounded-lg px-2 disabled:bg-slate-100 disabled:text-slate-400"
+              className="text-xs bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1 text-slate-300 focus:outline-none focus:border-teal-500 transition-colors"
             >
-              {SUPPORTED_LANGUAGES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+              {SUPPORTED_LANGUAGES.map(l => <option key={l.value} className="bg-slate-950 text-slate-300" value={l.value}>{l.label}</option>)}
             </select>
           </div>
-          <MonacoEditor
-            height="100%"
-            language={selectedLanguage}
-            theme="vs-dark"
-            value={currentDraft.code || ''}
-            onChange={updateDraftCode}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 13,
-              scrollBeyondLastLine: false,
-              readOnly: isQuestionLocked,
-              domReadOnly: isQuestionLocked
-            }}
-          />
+          <div className="flex-1 w-full overflow-hidden rounded-b-[1.75rem]">
+            <MonacoEditor
+              height="100%"
+              language={selectedLanguage}
+              theme="vs-dark"
+              value={currentDraft.code || ''}
+              onChange={updateDraftCode}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 13,
+                fontFamily: "Fira Code, Source Code Pro, Courier New, monospace",
+                scrollBeyondLastLine: false,
+                readOnly: isQuestionLocked,
+                domReadOnly: isQuestionLocked,
+                padding: { top: 12 }
+              }}
+            />
+          </div>
         </div>
       </div>
 
+      {/* AI Dynamic Evaluated Feedback (If available) */}
       {currentQuestion?.isEvaluated && (
-        <div className="mt-6 bg-emerald-50 border border-emerald-100 p-6 rounded-2xl animate-in fade-in slide-in-from-bottom-4">
-          <h3 className="text-emerald-800 font-bold mb-2">💡 AI Feedback</h3>
-          <p className="text-emerald-700 text-sm leading-relaxed">{currentQuestion.aiFeedback}</p>
-          <div className="mt-4 flex gap-4">
-            <span className="bg-white px-3 py-1 rounded-lg text-xs font-bold text-emerald-600 shadow-sm">Score: {currentQuestion.technicalScore}/100</span>
+        <div className="mt-8 bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-[2rem] animate-in fade-in">
+          <h3 className="text-emerald-400 font-extrabold text-xs uppercase tracking-widest mb-2 flex items-center">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 mr-2.5" />
+            Instant AI Evaluation Feedback
+          </h3>
+          <p className="text-emerald-300/80 text-sm leading-relaxed font-medium">{currentQuestion.aiFeedback}</p>
+          <div className="mt-5 flex gap-4">
+            <span className="bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-black text-emerald-400 shadow-sm">
+              SCORE: {currentQuestion.technicalScore}/100
+            </span>
           </div>
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 px-6 md:px-12 flex justify-between items-center z-50">
+      {/* Floating Bottom Navigator bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-md border-t border-white/5 p-4 px-6 md:px-12 flex justify-between items-center z-50">
         <button
           onClick={() => handleNavigation(currentQuestionIndex - 1)}
           disabled={currentQuestionIndex === 0}
-          className="text-slate-500 font-bold text-sm hover:text-slate-800 disabled:opacity-30"
+          className="text-slate-400 font-extrabold text-xs uppercase tracking-wider hover:text-white disabled:opacity-20 transition-colors"
         >
           ← Previous
         </button>
 
         <div className="flex flex-col items-center">
-          {/* ✅ STATUS BAR: Shows if Locked but not Evaluated yet */}
+          {/* Status Processing Indicator */}
           {isProcessing && message && (
-            <div className="mb-2 text-xs font-mono text-blue-600 bg-blue-50 px-3 py-1 rounded-full animate-pulse border border-blue-100">
+            <div className="mb-2 text-[10px] font-mono text-teal-400 bg-teal-500/10 px-3 py-1 rounded-full animate-pulse border border-teal-500/20">
               🤖 {message}...
             </div>
           )}
@@ -331,11 +370,15 @@ function InterviewRunner() {
           <button
             onClick={handleSubmitAnswer}
             disabled={isQuestionLocked}
-            className={`px-8 py-3 rounded-xl font-bold text-white shadow-lg transition-all ${isProcessing ? 'bg-slate-400 cursor-wait' :
-              currentQuestion?.isEvaluated ? 'bg-emerald-500' :
-                isQuestionLocked ? 'bg-slate-400' :
-                  'bg-slate-900 hover:bg-slate-800 active:scale-95'
-              }`}
+            className={`px-8 py-3 rounded-xl font-extrabold text-xs uppercase tracking-widest text-white shadow-lg transition-all active:scale-[0.98] ${
+              isProcessing 
+                ? 'bg-slate-800 text-slate-500 border border-white/5 cursor-wait' 
+                : currentQuestion?.isEvaluated 
+                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/10' 
+                : isQuestionLocked 
+                ? 'bg-slate-800 text-slate-400 border border-white/5' 
+                : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:shadow-teal-500/15'
+            }`}
           >
             {isProcessing ? "Analyzing..." : currentQuestion?.isEvaluated ? "Answer Submitted" : isQuestionLocked ? "Submitted" : "Submit Answer"}
           </button>
@@ -344,7 +387,7 @@ function InterviewRunner() {
         <button
           onClick={() => handleNavigation(currentQuestionIndex + 1)}
           disabled={currentQuestionIndex === activeSession.questions.length - 1}
-          className="text-slate-500 font-bold text-sm hover:text-slate-800 disabled:opacity-30"
+          className="text-slate-400 font-extrabold text-xs uppercase tracking-wider hover:text-white disabled:opacity-20 transition-colors"
         >
           Next →
         </button>

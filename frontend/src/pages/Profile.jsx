@@ -23,7 +23,7 @@ const ROLES = [
   "QA Automation Engineer",
   "Product Manager"
 ];
-const inputBase = 'w-full bg-slate-50 border-2 border-transparent rounded-xl sm:rounded-2xl p-3.5  sm-4 fornt-semibold text-slate-700 text-base transition-all focus:bg-white focus:border-teal-500 outline-none';
+const inputBase = 'w-full px-4 py-3 glass-input rounded-xl text-sm font-semibold text-slate-300';
 const Profile = () => {
   const dispatch = useDispatch();
   const { user, isSuccess, isError, message, isProfileLoading } = useSelector((state) => state.auth);
@@ -65,11 +65,11 @@ const Profile = () => {
     dispatch(updateProfile(formData))
   }
   return (
-    <div className='max-w-4xl mx-auto px-4 py-6 sm:py-12 pb-24'>
-      <div className='bg-white rounded-3xl shadow-xl sm:shadow-2xl p-6 sm:p-12 border border-slate-100'>
-        <header className='mb-8'>
-          <h1 className='text-2xl sm:text-3xl font-black text-slate-900'>Edit Profile</h1>
-          <p className='text-sm text-slate-500 mt-1'>
+    <div className='max-w-3xl mx-auto px-4 py-6 sm:py-12 pb-24 font-sans'>
+      <div className='glass-card rounded-[2rem] p-6 sm:p-10 shadow-2xl'>
+        <header className='mb-8 border-b border-white/5 pb-5'>
+          <h1 className='text-2xl sm:text-3xl font-extrabold text-white'>Edit Profile</h1>
+          <p className='text-xs sm:text-sm text-slate-400 mt-1.5 font-medium'>
             Update your professional details and preferences
           </p>
         </header>
@@ -90,11 +90,10 @@ const Profile = () => {
           <FormField label="Email Address (Fixed)" muted>
             <input
               type="email"
-              className='w-full bg-slate-100 rounded-xl sm:rounded-2xl p-3.5  sm-4 fornt-semibold text-slate-500 text-base cursor-not-allowed'
+              className='w-full bg-slate-900/50 border border-white/5 rounded-xl px-4 py-3 text-slate-500 text-sm cursor-not-allowed font-medium'
               disabled
               value={formData.email}
               onChange={handleChange}
-
             />
           </FormField>
 
@@ -103,10 +102,9 @@ const Profile = () => {
               <select name="preferredRole" value={formData.preferredRole} onChange={handleChange} className={`${inputBase} appearance-none`}>
                 {
                   ROLES.map((role) => (
-                    <option key={role} value={role}>{role}</option>
+                    <option className="bg-slate-950 text-slate-300 text-sm" key={role} value={role}>{role}</option>
                   ))
                 }
-
               </select>
               <SelectArrow />
             </div>
@@ -116,7 +114,7 @@ const Profile = () => {
             <button
               type='submit'
               disabled={isProfileLoading}
-              className={`w-full flex items-center justify-center gap-2 py-4 font-bold rounded-xl sm:rounded-2xl transition-all active:scale-[0.98] ${isProfileLoading ? 'bg-slate-200 text-slate-400 cursor-wait' : 'bg-teal-600 text-white hover:bg-teal-700 shadow-lg shadow-teal-100'}`}>
+              className={`w-full flex items-center justify-center gap-2 py-3.5 font-extrabold text-sm rounded-xl transition-all active:scale-[0.99] ${isProfileLoading ? 'bg-slate-800 text-slate-500 cursor-wait border border-white/5' : 'bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white shadow-lg shadow-teal-500/10'}`}>
               {
                 isProfileLoading ? <Loader /> : 'Save Changes'
               }
