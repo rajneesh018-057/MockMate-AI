@@ -5,11 +5,6 @@ import json
 import tempfile
 import re
 
-# Add FFMPEG path directly to environment PATH to ensure pydub finds it on Windows
-ffmpeg_path = r"C:\Users\VIVEK\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin"
-if os.path.exists(ffmpeg_path) and ffmpeg_path not in os.environ["PATH"]:
-    os.environ["PATH"] += os.path.pathsep + ffmpeg_path
-
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,8 +12,6 @@ from dotenv import load_dotenv
 from typing import Optional
 
 import google.generativeai as genai
-import whisper
-from pydub import AudioSegment
 
 load_dotenv()
 
@@ -45,16 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-WHISPER_MODEL = None
-
-try:
-    print("Loading Whisper Model...")
-    WHISPER_MODEL = whisper.load_model("base.en")
-    print("Whisper Model Loaded Successfully")
-except Exception as e:
-    print("Error while loading Whisper Model")
-    print(e)
 
 
 class QuestionResquest(BaseModel):
@@ -156,45 +139,31 @@ async def transcribe_audio(file: UploadFile = File(...)):
 
     try:
         audio_bytes = await file.read()
+        mime_type = file.content_type or "audio/webm"
 
-        audio_in_memory = io.BytesIO(audio_bytes)
+        # Prompt Gemini to transcribe the audio natively
+        prompt = (
+            "Transcribe this audio file accurately. "
+            "Return only the transcription text, nothing else. "
+            "If there is no speech, silent audio, or noise, return an empty string."
+        )
 
-        audio_segment = AudioSegment.from_file(audio_in_memory)
+        response = model.generate_content([
+            {
+                "mime_type": mime_type,
+                "data": audio_bytes
+            },
+            prompt
+        ])
 
-        with tempfile.NamedTemporaryFile(
-            delete=False,
-            suffix=".mp3"
-        ) as tmp:
-
-            temp_audio_path = tmp.name
-
-            audio_segment.export(
-                temp_audio_path,
-                format="mp3"
-            )
-
-        if not WHISPER_MODEL:
-            raise HTTPException(
-                status_code=503,
-                detail="Whisper model not loaded"
-            )
-
-        result = WHISPER_MODEL.transcribe(temp_audio_path)
-
-        os.remove(temp_audio_path)
+        transcription = response.text.strip()
 
         return {
-            "transcription": result["text"].strip()
+            "transcription": transcription
         }
 
     except Exception as e:
-
-        if (
-            'temp_audio_path' in locals()
-            and os.path.exists(temp_audio_path)
-        ):
-            os.remove(temp_audio_path)
-
+        print(f"Transcription error: {e}")
         raise HTTPException(
             status_code=500,
             detail=str(e)
