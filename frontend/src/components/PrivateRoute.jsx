@@ -18,7 +18,7 @@ const PrivateRoute = () => {
   }
 
   return user ? (
-    <div className="flex flex-col min-h-screen bg-slate-950 w-full">
+    <div className="flex flex-col min-h-screen bg-transparent w-full">
       <Header />
       <div className="flex-1 w-full page-enter">
         <Outlet />

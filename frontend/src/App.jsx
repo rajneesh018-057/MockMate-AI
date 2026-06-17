@@ -20,7 +20,7 @@ const App = () => {
   useSocket();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
+    <div className="min-h-screen bg-transparent text-slate-100 flex flex-col font-sans relative">
       <LiveBackground />
       <main className="flex-1 w-full flex flex-col relative z-10">
         <Routes>

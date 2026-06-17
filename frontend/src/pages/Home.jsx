@@ -6,7 +6,7 @@ const Home = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div className="relative min-h-screen bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="relative min-h-screen bg-transparent text-slate-100 overflow-hidden">
       {/* Background radial glow orbs */}
       <div className="absolute top-[-10%] left-[-20%] w-[80%] h-[60%] rounded-full bg-gradient-to-br from-teal-500/10 to-indigo-500/0 blur-[130px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-20%] w-[80%] h-[60%] rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/0 blur-[130px] pointer-events-none" />

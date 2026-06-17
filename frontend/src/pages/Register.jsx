@@ -71,7 +71,7 @@ const Register = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 px-4 py-10 font-sans">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-transparent px-4 py-10 font-sans">
       
       {/* Background Effects */}
       <div className="absolute top-[10%] left-[10%] w-[400px] h-[400px] bg-cyan-500/10 blur-[130px] rounded-full pointer-events-none"></div>
