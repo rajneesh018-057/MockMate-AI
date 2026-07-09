@@ -5,8 +5,16 @@ import { socketUpdateSession } from '../features/sessions/sessionSlice';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const VITE_API_URL = import.meta.env.VITE_API_URL || '';
-const BACKEND_URL = VITE_API_URL.replace('/api', ''); 
+const getCleanApiUrl = () => {
+    let url = import.meta.env.VITE_API_URL || '';
+    url = url.trim().replace(/\/+$/, '');
+    if (url && !url.endsWith('/api')) {
+        url += '/api';
+    }
+    return url;
+};
+
+const BACKEND_URL = getCleanApiUrl().replace('/api', '');
 
 const useSocket = () => {
   const dispatch = useDispatch();
