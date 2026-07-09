@@ -2,6 +2,5 @@ fastapi
 uvicorn
 pydantic
 python-dotenv
-google-generativeai
 python-multipart
 groq

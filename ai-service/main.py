@@ -11,27 +11,16 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from typing import Optional
 
-import google.generativeai as genai
 from groq import Groq
 
 load_dotenv()
 
 AI_SERVICE_PORT = int(os.getenv("PORT", os.getenv("AI_SERVICE_PORT", 8000)))
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
-# Configure Gemini if key is provided
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    gemini_model = genai.GenerativeModel(GEMINI_MODEL)
-else:
-    gemini_model = None
-
-# Configure Groq if key is provided
+# Configure Groq client
 if GROQ_API_KEY:
     groq_client = Groq(api_key=GROQ_API_KEY)
 else:
@@ -85,7 +74,7 @@ class EvaluationResponse(BaseModel):
 async def root():
     return {
         "message": "Hello from AI Interviewer Microservice!",
-        "model": GEMINI_MODEL
+        "model": GROQ_MODEL
     }
 
 
@@ -128,20 +117,16 @@ Rules:
 - No headings
 """
 
-        if groq_client:
-            completion = groq_client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model=GROQ_MODEL,
-                temperature=0.7
-            )
-            raw_text = completion.choices[0].message.content.strip()
-            model_used = GROQ_MODEL
-        else:
-            if not gemini_model:
-                raise Exception("Neither GEMINI_API_KEY nor GROQ_API_KEY is configured.")
-            response = gemini_model.generate_content(prompt)
-            raw_text = response.text.strip()
-            model_used = GEMINI_MODEL
+        if not groq_client:
+            raise Exception("GROQ_API_KEY is not configured.")
+
+        completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model=GROQ_MODEL,
+            temperature=0.7
+        )
+        raw_text = completion.choices[0].message.content.strip()
+        model_used = GROQ_MODEL
 
         questions = [
             q.strip()
@@ -172,38 +157,29 @@ async def transcribe_audio(file: UploadFile = File(...)):
             "If there is no speech, silent audio, or noise, return an empty string."
         )
 
-        if groq_client:
-            import io
-            suffix = ".wav"
-            if "webm" in mime_type:
-                suffix = ".webm"
-            elif "mp3" in mime_type:
-                suffix = ".mp3"
-            elif "ogg" in mime_type:
-                suffix = ".ogg"
-            elif "m4a" in mime_type:
-                suffix = ".m4a"
+        if not groq_client:
+            raise Exception("GROQ_API_KEY is not configured.")
 
-            audio_file = io.BytesIO(audio_bytes)
-            audio_file.name = f"audio{suffix}"
+        import io
+        suffix = ".wav"
+        if "webm" in mime_type:
+            suffix = ".webm"
+        elif "mp3" in mime_type:
+            suffix = ".mp3"
+        elif "ogg" in mime_type:
+            suffix = ".ogg"
+        elif "m4a" in mime_type:
+            suffix = ".m4a"
 
-            transcription_response = groq_client.audio.transcriptions.create(
-                file=audio_file,
-                model="whisper-large-v3",
-                response_format="json"
-            )
-            transcription = transcription_response.text.strip()
-        else:
-            if not gemini_model:
-                raise Exception("Neither GEMINI_API_KEY nor GROQ_API_KEY is configured.")
-            response = gemini_model.generate_content([
-                {
-                    "mime_type": mime_type,
-                    "data": audio_bytes
-                },
-                prompt
-            ])
-            transcription = response.text.strip()
+        audio_file = io.BytesIO(audio_bytes)
+        audio_file.name = f"audio{suffix}"
+
+        transcription_response = groq_client.audio.transcriptions.create(
+            file=audio_file,
+            model="whisper-large-v3",
+            response_format="json"
+        )
+        transcription = transcription_response.text.strip()
 
         return {
             "transcription": transcription
@@ -265,19 +241,16 @@ Code Answer:
 {request.user_code or "No code provided"}
 """
 
-        if groq_client:
-            completion = groq_client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model=GROQ_MODEL,
-                temperature=0.2,
-                response_format={"type": "json_object"}
-            )
-            response_text = completion.choices[0].message.content.strip()
-        else:
-            if not gemini_model:
-                raise Exception("Neither GEMINI_API_KEY nor GROQ_API_KEY is configured.")
-            response = gemini_model.generate_content(prompt)
-            response_text = response.text.strip()
+        if not groq_client:
+            raise Exception("GROQ_API_KEY is not configured.")
+
+        completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model=GROQ_MODEL,
+            temperature=0.2,
+            response_format={"type": "json_object"}
+        )
+        response_text = completion.choices[0].message.content.strip()
 
         response_text = re.sub(
             r"^```json|```$",
@@ -313,7 +286,7 @@ Code Answer:
             return EvaluationResponse(
                 technicalScore=0,
                 confidenceScore=0,
-                aiFeedback="Failed to parse Gemini response",
+                aiFeedback="Failed to parse AI response",
                 idealAnswer="Failed to parse response"
             )
 

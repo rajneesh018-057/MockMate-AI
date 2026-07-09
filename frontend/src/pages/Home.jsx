@@ -59,7 +59,7 @@ const Home = () => {
         <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 mb-8 animate-pulse-glow">
           <span className="h-2 w-2 rounded-full bg-teal-400" />
           <span className="text-[10px] font-extrabold uppercase tracking-widest">
-            Simulate & Succeed with Gemini AI
+            Simulate & Succeed with Groq AI
           </span>
         </div>
 
@@ -111,7 +111,7 @@ const Home = () => {
               <span className="text-teal-400">const</span> evaluateAnswer = (<span className="text-amber-400">code</span>) =&gt; &#123;<br />
               &nbsp;&nbsp;<span className="text-slate-400">// Processing verbal and text feedback</span><br />
               &nbsp;&nbsp;<span className="text-teal-400">const</span> confidence = analyzeConfidenceAudio();<br />
-              &nbsp;&nbsp;<span className="text-teal-400">return</span> Gemini.evaluate(&#123; code, confidence &#125;);<br />
+              &nbsp;&nbsp;<span className="text-teal-400">return</span> Groq.evaluate(&#123; code, confidence &#125;);<br />
               &#125;;
             </div>
           </div>
@@ -163,7 +163,7 @@ const Home = () => {
             },
             {
               icon: "📊",
-              title: "Gemini Smart Evaluation",
+              title: "Groq Smart Evaluation",
               desc: "Receive breakdown score feedback, technical accuracy reviews, and ideal response implementations for every single answer."
             }
           ].map((item, index) => (
