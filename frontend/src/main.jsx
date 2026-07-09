@@ -28,7 +28,7 @@ axios.interceptors.response.use(
 
 createRoot(document.getElementById('root')).render(
 
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || "placeholder-google-client-id"}>
     <Provider store={store}>
       <Router>
         <App />

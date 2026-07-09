@@ -5,7 +5,8 @@ import { socketUpdateSession } from '../features/sessions/sessionSlice';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL.replace('/api', ''); 
+const VITE_API_URL = import.meta.env.VITE_API_URL || '';
+const BACKEND_URL = VITE_API_URL.replace('/api', ''); 
 
 const useSocket = () => {
   const dispatch = useDispatch();
