@@ -1,18 +1,10 @@
 // backend/controllers/sessionController.js
 import asyncHandler from 'express-async-handler';
 import Session from '../models/SessionModel.js';
-import fetch from 'node-fetch'; // Standard for making HTTP requests (npm install node-fetch@2.6.1)
-import fs from 'fs'; // <-- NEW: For reading and deleting the temporary file
-import FormData from 'form-data'; // <-- NEW: For sending files to FastAPI
+import fs from 'fs'; 
 import path from 'path';
 import mongoose from 'mongoose';
-// URL for the Python AI Microservice (Must match Step 6 setup)
-const getCleanAiServiceUrl = () => {
-    let url = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    return url.trim().replace(/\/+$/, '');
-};
-
-const AI_SERVICE_URL = getCleanAiServiceUrl();
+import { generateQuestions, transcribeAudio, evaluateAnswer } from '../services/aiService.js';
 
 // Helper function to send an update via Socket.io
 const pushSocketUpdate = (io, userId, sessionId, status, message, session = null) => {
@@ -64,26 +56,8 @@ const createSession = asyncHandler(async (req, res) => {
             // A. Notify the user via Socket.io that processing has started
             pushSocketUpdate(io, userId, session._id, 'AI_GENERATING_QUESTIONS', `Generating ${count} questions for ${role}...`);
 
-            // B. Call the Python AI Microservice
-            // backend/controllers/sessionController.js inside createSession
-            const aiResponse = await fetch(`${AI_SERVICE_URL}/generate-questions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    role,
-                    level,
-                    count,
-                    interview_type: interviewType // ADD THIS LINE
-                }),
-            });
-
-            if (!aiResponse.ok) {
-                // If the AI service returns a non-200 status
-                const errorBody = await aiResponse.text();
-                throw new Error(`AI Service error: ${aiResponse.status} - ${errorBody}`);
-            }
-
-            const aiData = await aiResponse.json();
+            // B. Call the AI service natively
+            const aiData = await generateQuestions(role, level, interviewType, count);
             const codingCount = interviewType === 'coding-mix' ? Math.floor(count * 0.2) : 0;
             // C. Map the raw questions into the structured Mongoose sub-document format
             const questionsArray = aiData.questions.map((qText, index) => ({
@@ -182,18 +156,7 @@ const evaluateAnswerAsync = async (io, userId, sessionId, questionIndex, audioFi
     if (audioFilePath) {
         try {
             pushSocketUpdate(io, userId, sessionId, 'AI_TRANSCRIBING', `Transcribing audio for Q${questionIdx + 1}...`);
-            const formData = new FormData();
-            formData.append('file', fs.createReadStream(audioFilePath));
-
-            const transResponse = await fetch(`${AI_SERVICE_URL}/transcribe`, {
-                method: 'POST',
-                body: formData,
-                headers: formData.getHeaders(),
-            });
-
-            if (!transResponse.ok) throw new Error('Transcription service failed');
-
-            const transData = await transResponse.json();
+            const transData = await transcribeAudio(audioFilePath);
             transcription = transData.transcription || "";
         } catch (error) {
             console.error(`Transcription Error: ${error.message}`);
@@ -207,22 +170,14 @@ const evaluateAnswerAsync = async (io, userId, sessionId, questionIndex, audioFi
     try {
         pushSocketUpdate(io, userId, sessionId, 'AI_EVALUATING', `AI is analyzing Q${questionIdx + 1}...`);
 
-        const evalResponse = await fetch(`${AI_SERVICE_URL}/evaluate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                question: question.questionText,
-                question_type: question.questionType, // Tells AI if it should expect code
-                role: session.role,
-                level: session.level,
-                user_answer: transcription, // Dedicated transcription field
-                user_code: code || "",      // Dedicated code field
-            }),
-        });
-
-        if (!evalResponse.ok) throw new Error('AI Evaluation service failed');
-
-        const evalData = await evalResponse.json();
+        const evalData = await evaluateAnswer(
+            question.questionText,
+            question.questionType,
+            session.role,
+            session.level,
+            transcription,
+            code || ""
+        );
 
         // --- Phase 3: Correct MongoDB Mapping ---
         // Store them strictly in their respective fields
