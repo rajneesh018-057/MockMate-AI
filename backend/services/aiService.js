@@ -15,7 +15,7 @@ const getGroqClient = () => {
     return groqClient;
 };
 
-const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
 /**
  * Generates interview questions based on role, level, and type.
