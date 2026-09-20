@@ -15,6 +15,23 @@ const getGroqClient = () => {
     return groqClient;
 };
 
+// Retry helper for 3rd-party API resilience
+const withRetry = async (fn, maxRetries = 3, delay = 2000) => {
+    let retries = 0;
+    while (retries < maxRetries) {
+        try {
+            return await fn();
+        } catch (error) {
+            retries++;
+            console.error(`[API Retry] Attempt ${retries} failed: ${error.message}`);
+            if (retries >= maxRetries) {
+                throw error;
+            }
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+};
+
 const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
 /**
@@ -50,11 +67,11 @@ Rules:
 
 
     const groq = getGroqClient();
-    const completion = await groq.chat.completions.create({
+    const completion = await withRetry(() => groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
         model: GROQ_MODEL,
         temperature: 0.7
-    });
+    }));
 
     const rawText = completion.choices[0].message.content.trim();
     const questions = rawText
@@ -87,12 +104,12 @@ export const transcribeAudio = async (audioFilePath) => {
     }
 
     try {
-        const transcription = await groq.audio.transcriptions.create({
+        const transcription = await withRetry(() => groq.audio.transcriptions.create({
             file: fs.createReadStream(finalPath),
             model: "whisper-large-v3",
             response_format: "json",
             prompt: "Transcribe this audio file accurately. Return only the transcription text, nothing else. If there is no speech, silent audio, or noise, return an empty string."
-        });
+        }));
 
         return {
             transcription: transcription.text ? transcription.text.trim() : ""
@@ -144,12 +161,12 @@ ${userCode || "No code provided"}
 `;
 
     const groq = getGroqClient();
-    const completion = await groq.chat.completions.create({
+    const completion = await withRetry(() => groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
         model: GROQ_MODEL,
         temperature: 0.2,
         response_format: { type: "json_object" }
-    });
+    }));
 
     let responseText = completion.choices[0].message.content.trim();
 

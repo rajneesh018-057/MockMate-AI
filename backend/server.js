@@ -9,6 +9,8 @@ import sessionRoutes from "./routes/sessionRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
+import morgan from "morgan";
 
 
 
@@ -44,6 +46,17 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// HTTP Request Logging
+app.use(morgan("dev"));
+
+// API Rate Limiting to prevent abuse
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per 15 minutes
+    message: { message: "Too many requests from this IP, please try again later." },
+});
+app.use("/api/", apiLimiter);
 
 app.set("io", io);
 
