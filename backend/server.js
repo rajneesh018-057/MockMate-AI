@@ -11,6 +11,14 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
+import helmet from "helmet";
+import compression from "compression";
+
+// Redis & BullMQ
+import getRedisConnection from "./config/redis.js";
+import { createAdapter } from "@socket.io/redis-adapter";
+import Redis from "ioredis";
+import { startQuestionWorker, startEvaluationWorker } from "./workers/aiWorker.js";
 
 
 
@@ -47,6 +55,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Security Headers (prevents clickjacking, XSS, MIME sniffing)
+app.use(helmet());
+
+// Gzip Compression (reduces API response size by ~70%)
+app.use(compression());
+
 // HTTP Request Logging
 app.use(morgan("dev"));
 
@@ -80,6 +94,31 @@ io.on("connection", (socket) => {
         console.log(`User Disconnected ${socket.id}`);
     });
 });
+
+// --- Redis Adapter for Socket.io (enables multi-server WebSocket scaling) ---
+const redisConn = getRedisConnection();
+if (redisConn) {
+    const pubClient = new Redis(process.env.REDIS_URL);
+    const subClient = pubClient.duplicate();
+
+    pubClient.on("error", (err) => console.warn("[Socket.io PubClient Error]:", err.message));
+    subClient.on("error", (err) => console.warn("[Socket.io SubClient Error]:", err.message));
+
+    Promise.all([pubClient.ping(), subClient.ping()])
+        .then(() => {
+            io.adapter(createAdapter(pubClient, subClient));
+            console.log("[Socket.io] Redis adapter attached. WebSockets can scale horizontally.");
+        })
+        .catch((err) => {
+            console.warn("[Socket.io] Redis adapter failed, using default in-memory adapter:", err.message);
+        });
+
+    // Start BullMQ Workers
+    startQuestionWorker(io);
+    startEvaluationWorker(io);
+} else {
+    console.warn("[Server] Redis not available. Running in single-server mode.");
+}
 
 app.use(notFound);
 app.use(errorHandler);

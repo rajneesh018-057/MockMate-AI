@@ -1,22 +1,16 @@
 services:
-  ai-service:
-    build:
-      context: ./ai-service
-      dockerfile: Dockerfile
-    container_name: ai-service
+  redis:
+    image: redis:alpine
+    container_name: local-redis
     ports:
-      - "8000:8000"
-    environment:
-      - AI_SERVICE_PORT=8000
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-20b}
+      - "6379:6379"
     restart: always
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: api-gateway
+    container_name: backend
     ports:
       - "5000:5000"
     environment:
@@ -24,10 +18,12 @@ services:
       - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=${JWT_SECRET}
       - NODE_ENV=production
-      - AI_SERVICE_URL=http://ai-service:8000
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-20b}
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      - ai-service
+      - redis
     restart: always
 
   frontend:
@@ -37,9 +33,10 @@ services:
       args:
         - VITE_API_URL=http://localhost:5000/api
         - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
-    container_name: frontend-app
+    container_name: frontend
     ports:
       - "3000:80"
     depends_on:
       - backend
     restart: always
+

@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import mongoose from 'mongoose';
 import { generateQuestions, transcribeAudio, evaluateAnswer } from '../services/aiService.js';
+import { getQuestionQueue, getEvaluationQueue } from '../queues/aiQueue.js';
 
 // Helper function to send an update via Socket.io
 const pushSocketUpdate = (io, userId, sessionId, status, message, session = null) => {
@@ -48,42 +49,49 @@ const createSession = asyncHandler(async (req, res) => {
         status: 'processing',
     });
 
-    // --- ASYNCHRONOUS BACKGROUND TASK START ---
+    // --- ASYNCHRONOUS BACKGROUND TASK ---
+    const questionQueue = getQuestionQueue();
 
-    // Using a self-executing async function to run the process in the background
-    (async () => {
-        try {
-            // A. Notify the user via Socket.io that processing has started
-            pushSocketUpdate(io, userId, session._id, 'AI_GENERATING_QUESTIONS', `Generating ${count} questions for ${role}...`);
+    if (questionQueue) {
+        // BullMQ Mode: Push job to Redis queue (durable, survives crashes)
+        await questionQueue.add('generate', {
+            sessionId: session._id.toString(),
+            userId: userId.toString(),
+            role,
+            level,
+            interviewType,
+            count,
+        });
+        console.log(`[Queue] Question generation job queued for session: ${session._id}`);
+    } else {
+        // Fallback Mode: Run in-memory if Redis is not available (development)
+        (async () => {
+            try {
+                pushSocketUpdate(io, userId, session._id, 'AI_GENERATING_QUESTIONS', `Generating ${count} questions for ${role}...`);
 
-            // B. Call the AI service natively
-            const aiData = await generateQuestions(role, level, interviewType, count);
-            const codingCount = interviewType === 'coding-mix' ? Math.floor(count * 0.2) : 0;
-            // C. Map the raw questions into the structured Mongoose sub-document format
-            const questionsArray = aiData.questions.map((qText, index) => ({
-                questionText: qText,
-                questionType: index < codingCount ? 'coding' : 'oral',
-                isEvaluated: false,
-                isSubmitted: false,
-            }));
+                const aiData = await generateQuestions(role, level, interviewType, count);
+                const codingCount = interviewType === 'coding-mix' ? Math.floor(count * 0.2) : 0;
+                const questionsArray = aiData.questions.map((qText, index) => ({
+                    questionText: qText,
+                    questionType: index < codingCount ? 'coding' : 'oral',
+                    isEvaluated: false,
+                    isSubmitted: false,
+                }));
 
-            // D. Update the session in MongoDB
-            session.questions = questionsArray;
-            session.status = 'in-progress';
-            await session.save();
+                session.questions = questionsArray;
+                session.status = 'in-progress';
+                await session.save();
 
-            // E. Push final result back to the client via Socket.io
-            pushSocketUpdate(io, userId, session._id, 'QUESTIONS_READY', 'Questions generated successfully. Starting session.', session);
+                pushSocketUpdate(io, userId, session._id, 'QUESTIONS_READY', 'Questions generated successfully. Starting session.', session);
 
-        } catch (error) {
-            console.error(`Session Creation Failure for ${session._id}:`, error.message);
-
-            // F. Handle failure: Update status and notify client
-            session.status = 'failed';
-            await session.save();
-            pushSocketUpdate(io, userId, session._id, 'GENERATION_FAILED', `Question generation failed. Reason: ${error.message}.`);
-        }
-    })();
+            } catch (error) {
+                console.error(`Session Creation Failure for ${session._id}:`, error.message);
+                session.status = 'failed';
+                await session.save();
+                pushSocketUpdate(io, userId, session._id, 'GENERATION_FAILED', `Question generation failed. Reason: ${error.message}.`);
+            }
+        })();
+    }
 });
 
 // @desc    Get all interview sessions for the current user
